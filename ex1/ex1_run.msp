@@ -1,0 +1,44 @@
+## In rotating-drum-common.msp
+# set_mono_mat
+# compute_force
+includes:
+  - rotating-drum-common.msp
+
+io_tree:
+  - io_config:
+     dir_name: "PolyhedraRotatingDrumDir"
+
+input_data:
+  - init_rcb_grid
+  - read_shape_file:
+     filename: PolyhedraRotatingDrumDir/CheckpointFiles/RestartShapeFile.shp
+  - read_dump_particle_interaction:
+     filename: PolyhedraRotatingDrumDir/CheckpointFiles/exadem_0000800000.dump
+  - enable_obb_tree
+
+setup_drivers:
+  - register_cylinder:
+     id: 0
+     state: {radius: 50 m, center: [0,0,0], axis: [1,0,1], vrot: [0,0.15,0]}
+     params: { motion_type: STATIONARY }
+
+domain:
+  cell_size: 10 m
+  periodic: [false,true,false]
+  grid_dims: [10, 2, 10]
+  bounds: [[-50,-10,-50],[50, 10, 50]]
+  expandable: true
+
+particle_write_paraview_generic:
+  - write_paraview_polyhedra
+  - write_paraview_obb_particles
+
+global:
+  simulation_dump_frequency: 200000
+  simulation_end_iteration: 1600000
+  simulation_log_frequency: 1000
+  simulation_paraview_frequency: 10000
+  dt: 0.00005 s 
+  rcut_inc: 0.1
+  enable_contact_network: true
+
