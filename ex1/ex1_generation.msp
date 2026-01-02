@@ -1,8 +1,7 @@
-## In rotating-drum-common.msp
 # set_mono_mat
 # compute_force
 includes:
-  - rotating-drum-common.msp
+  - common.msp
 
 io_tree:
   - io_config:
