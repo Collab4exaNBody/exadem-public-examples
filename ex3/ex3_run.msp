@@ -1,0 +1,83 @@
+includes:
+  - config_fragmentation.msp
+
+io_tree:
+  - io_config:
+     dir_name: "ImpactFragDirV2"
+
+particle_regions:
+  - WALL:
+     bounds: [[3,-10,0],[4,10,10]]
+
+input_data:
+  - init_rcb_grid
+  - add_cube:
+     length: 0.18
+     minskowski: 0.01
+  - lattice:
+     structure: SC
+     types: [ cube ]
+     size: [ 0.2 , 0.2 , 0.2 ]
+     region: WALL
+  - set_fields:
+     polyhedra: true
+     type:              [    cube ]
+     random_quaternion: [   false ]
+     sigma_velocity:    [     0.0 ]
+     velocity:          [ [0,0,0] ]     
+  - inner_bond_params:
+     default_config:
+        kn: 5.e3
+        kt: 5.e3
+        damp_rate: 0.87, g: 2.e-2
+
+setup_drivers:
+  - register_surface:
+     id: 0
+     state:
+        normal: [0,0,1]
+        offset: 0
+     params: 
+        motion_type: STATIONARY
+  - register_stl_mesh:
+     id: 1
+     filename: sphere.shp
+     minskowski: 1.0
+     state:
+        center: [1.5, 0.5, 4.5]
+        mass: 4.189
+        vel: [35, 0, 0]
+     params: 
+        motion_type: PARTICLE
+
+particle_write_paraview_generic:
+  - write_paraview_polyhedra
+  - write_conf_rockable
+  - timestep_paraview_file: "ParaviewOutputFiles/interface_%010d"
+  - write_paraview_interfaces:
+     mpi_rank: false
+
+compute_force:
+  - gravity_force
+  - contact_polyhedron:
+     config: { kn: 5000, kt: 5000, kr: 0.0, mu: 0.3, damp_rate: 0.87} 
+     config_driver: { kn: 5000, kt: 5000, kr: 0.0, mu: 0.3, damp_rate: 0.87} 
+  - inner_bond_polyhedron
+
+domain:
+  cell_size: 0.5 m
+  periodic: [false, true, false]
+  grid_dims: [20, 40, 20]
+  bounds: [[0,-10,0],[10, 10, 10]]
+  expandable: true
+
+global:
+  simulation_dump_frequency: -1
+  simulation_end_iteration: 300000
+  simulation_log_frequency: 100
+  simulation_paraview_frequency: 2500
+  dt: 0.000005 s 
+  rcut_inc: 0.005
+  enable_contact_network: true
+  apply_particle_sticking: true
+  sticking_threshold: 3e-2

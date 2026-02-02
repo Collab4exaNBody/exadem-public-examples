@@ -1,0 +1,19 @@
+
+
+<
+name sphere
+radius 1
+preCompDone y
+nv 1
+0 0 0
+ne 0
+nf 0
+obb.extent 1 1 1
+obb.e1 1 0 0
+obb.e2 0 1 0
+obb.e3 0 0 1
+obb.center 0 0 0
+orientation 1.0 0.0 0.0 0.0
+volume 3.141592653589793
+I/m 0.4 0.4 0.4
+>
