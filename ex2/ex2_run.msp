@@ -1,0 +1,101 @@
+#Units : [mm], [g], [N], [ms]
+grid_flavor: grid_flavor_dem
+
+includes:
+  - config_polyhedra.msp
+
+io_tree:
+  - io_config:
+     dir_name: "BeybladeArena"  
+
+particle_regions:
+   - BOT:
+      bounds: [[-0.2 , -0.2 , 0 ] , [ 0.2 , 0.2 , 0.05 ] ]
+
+## optimize neighbor search
+chunk_neighbors_impl:
+  - chunk_neighbors_contact
+  - nbh_polyhedron_obb_tree
+  - classify_interactions
+
+particles_def:
+  - read_shape_file:
+     filename: toupie.shp
+     rename:       [toupie ]
+     scale_factor: [   0.5 ]
+  - lattice:
+     structure: SC
+     types: [        toupie ]
+     size:  [ 0.05, 0.05, 0.05 ]
+     region: BOT 
+  - set_fields:
+     polyhedra: true
+     type:              [        toupie ]
+     velocity:          [    [0,0,-0.5] ]
+     angular_velocity:  [ [0.,0,1000.0] ]
+     sigma_velocity:    [          0.05 ]
+     random_quaternion: [         false ]
+     density:           [      1000.000 ]
+  - multimat_contact_params:
+     mat1:      [ toupie ]
+     mat2:      [ toupie ]
+     kn:        [    500 ]
+     kt:        [    400 ]
+     kr:        [    0.0 ]
+     mu:        [    0.3 ]
+     damprate:  [  0.999 ]
+  - drivers_contact_params:
+     mat:       [ toupie ]
+     driver_id: [      0 ]
+     kn:        [    500 ]
+     kt:        [    400 ]
+     kr:        [    0.0 ]
+     mu:        [    0.1 ]
+     damprate:  [  0.999 ]
+
+
+input_data:
+  - init_rcb_grid
+  - particles_def
+  - enable_obb_tree
+
+input_data:
+  - reader1  
+
+setup_drivers:
+  - register_stl_mesh:
+     id: 0
+     filename: ./arena.stl
+     minskowski: 0.001
+     scale: 3.0
+     binary: true
+     state: 
+        center: [ 0, 0,-0.05]
+        vel:    [ 0, 0, 0]
+        vrot:   [ 0, 0, 0]
+        quat:   [ 1, 0, 0, 0]
+     params: { motion_type: STATIONARY }
+
+compute_force:
+  - gravity_force:
+     gravity: [0,0,-9.81] #mm/cs
+  - contact_multimat_polyhedron
+
+domain:
+  cell_size:  0.05 
+  periodic:   [false, false, false]
+  grid_dims:  [20, 20, 1]
+  bounds:     [[-0.5 , -0.5 , 0], [0.5, 0.5, 0.05]]
+  expandable: true
+
+particle_write_paraview_generic:
+  - write_paraview_polyhedra:
+     mpi_rank: true
+
+global:
+  simulation_dump_frequency: 10000
+  simulation_end_iteration: 100000 
+  simulation_log_frequency: 100
+  simulation_paraview_frequency: 1000 
+  dt: 0.00001 #pour kn 1000
+  rcut_inc: 0.01
